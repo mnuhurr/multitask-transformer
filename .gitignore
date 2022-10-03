@@ -1,0 +1,7 @@
+__pycache__
+.idea
+
+# output files
+data
+*.csv
+*.yaml
