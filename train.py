@@ -14,6 +14,7 @@ from audiodata.utils import get_events_data
 
 from common import init_log
 from common import read_yaml
+from common import write_pickle
 
 from models import Transformer
 from models import ModelParameters
@@ -94,6 +95,7 @@ def main(config_fn='settings.yaml'):
         max_sequence_length=cfg.get('max_sequence_length', 64),
         dropout=cfg.get('dropout'))
 
+    write_pickle('train_params.pkl', params)
     
     transformer = Transformer(params).to(device)
     logger.info(f'transformer size {model_size(transformer)/1e6:.1f}M')

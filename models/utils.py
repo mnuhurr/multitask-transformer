@@ -21,21 +21,11 @@ class PositionalEncoding(torch.nn.Module):
         return self.dropout(x)
 
 
-def load_model(fn, cfg):
-
-    params = ModelParameters(
-        d_model=cfg.get('d_model', 128),
-        d_ff=cfg.get('d_ff', 512),
-        n_enc_heads=cfg.get('n_enc_heads', 4),
-        n_enc_layers=cfg.get('n_enc_layers', 2),
-        n_dec_heads=cfg.get('n_dec_heads', 4),
-        n_dec_layers=cfg.get('n_dec_layers', 2),
-        n_mels=cfg.get('n_mels', 128),
-        n_tokens=n_tokens,
-        max_mel_length=cfg.get('max_mel_length', 512),
-        max_sequence_length=cfg.get('max_sequence_length', 64),
-        dropout=cfg.get('dropout'))
-
+def load_transformer(fn, params, device=None):
+    from .transformer import Transformer
+    model = Transformer(params)
+    model.load_state_dict(torch.load(fn, map_location=device))
+    return model
 
 
 def foo():
