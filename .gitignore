@@ -6,3 +6,8 @@ data
 *.csv
 *.yaml
 *.pkl
+
+# some other
+coco_caption
+eval_metrics.py
+eval.py
