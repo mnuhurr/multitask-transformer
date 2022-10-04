@@ -2,6 +2,7 @@
 import math
 import torch
 
+
 class PositionalEncoding(torch.nn.Module):
     def __init__(self, d_model, max_len, dropout=0.0):
         super().__init__()
@@ -22,16 +23,15 @@ class PositionalEncoding(torch.nn.Module):
 
 
 def load_transformer(fn, params, device=None):
+    # simple helper function to load a saved transformer
     from .transformer import Transformer
     model = Transformer(params)
     model.load_state_dict(torch.load(fn, map_location=device))
     return model
 
 
-def foo():
-    penc = PositionalEncoding(d_model=4, max_len=20)
-    x = torch.randn(2, 12, 4)
-    print(penc(x) - x)
+def model_size(model):
+    num_params = sum(param.numel() for param in model.parameters())
+    return num_params
 
-if __name__ == '__main__':
-    foo()
+

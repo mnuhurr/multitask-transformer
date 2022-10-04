@@ -19,6 +19,7 @@ from common import write_pickle
 
 from models import Transformer
 from models import ModelParameters
+from models.utils import model_size
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -32,15 +33,11 @@ def masked_loss(y_pred, y_true, mask):
 
 
 def step_lr(step, d_model, warmup_steps=4000):
+    # learning rate from the original attention paper
     arg1 = torch.tensor(1 / math.sqrt(step)) if step > 0 else torch.tensor(float('inf'))
     arg2 = torch.tensor(step * warmup_steps**-1.5)
     
     return 1 / math.sqrt(d_model) * torch.minimum(arg1, arg2)
-
-
-def model_size(model):
-    num_params = sum(param.numel() for param in model.parameters())
-    return num_params
 
 
 def train(model, loader, optimizer, scheduler=None, log_interval=None):
