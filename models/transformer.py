@@ -27,7 +27,7 @@ class Encoder(torch.nn.Module):
         super().__init__()
 
         self.conv_net = torch.nn.Sequential(
-            torch.nn.Conv1d(n_mels, d_model, kernel_size=7, padding=3),
+            torch.nn.Conv1d(n_mels, d_model, kernel_size=5, padding=2),
             torch.nn.GELU(),
             torch.nn.Dropout(p=dropout),
 
