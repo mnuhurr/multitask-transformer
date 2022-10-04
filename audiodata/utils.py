@@ -105,15 +105,47 @@ def get_scenes_dir_data(data_dir):
     return data
 
 
-def get_scenes_data(cfg):
+def get_scenes_csv_data(csv_fn):
+    csv_fn = Path(csv_fn)
+
+    df = pd.read_csv(csv_fn, delimiter='\t', index_col=0)
+
+    base_dir = csv_fn.parent.parent
+
+    data = []
+    for fn, row in df.iterrows():
+        label = row['scene_label']
+
+        audio_fn = base_dir / fn
+
+        if audio_fn.exists():
+            data.append((audio_fn, label))
+
+    return data
+
+
+def get_scenes_data(cfg, split='development', fold=1):
     data = []
 
     data_dirs = cfg.get('scenes_datasets', [])
     if data_dirs is None:
         return data
 
+    if split == 'development':
+        split_str = 'train'
+
+    elif split == 'validation':
+        split_str = 'evaluate'
+
+    elif split == 'evaluation':
+        split_str = 'test'
+
     for data_dir in data_dirs:
-        data.extend(get_scenes_dir_data(data_dir))
+        #data.extend(get_scenes_dir_data(data_dir))
+        csv_fn = Path(data_dir) / 'evaluation_setup' / f'fold{fold}_{split_str}.csv'
+
+        if csv_fn.exists():
+            data.extend(get_scenes_csv_data(csv_fn))
 
     return data
 

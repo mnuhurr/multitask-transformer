@@ -127,7 +127,6 @@ def main(config_fn='settings.yaml'):
     mask_freq_param = cfg.get('mask_freq_param', 0)
     mask_time_param = cfg.get('mask_time_param', 0)
 
-    logger.info(f'sample_rate={sample_rate}, n_fft={n_fft}, hop_length={hop_length}, n_mels={n_mels}')
 
     # use default tokenizer
     train_dataset = MultitaskDataset(
@@ -153,9 +152,13 @@ def main(config_fn='settings.yaml'):
     # construct a validation dataset 
     val_caption_data = get_clotho_data(cfg.get('clotho_dir'), split='validation')
     logger.info(f'got {len(val_caption_data)} audio - caption pairs for validation')
+    
+    val_scene_data = get_scenes_data(cfg, split='validation')
+    logger.info(f'got {len(val_scene_data)} audio - scene label pairs for validation')
 
     val_dataset = MultitaskDataset(
         caption_data=val_caption_data,
+        scene_data=val_scene_data,
         sample_rate=sample_rate,
         n_fft=n_fft,
         hop_length=hop_length,
@@ -164,9 +167,14 @@ def main(config_fn='settings.yaml'):
         mask_time_param=mask_time_param)
 
     val_dataset.scene = train_dataset.scene
+    val_dataset.scene_index = train_dataset.scene_index
     val_dataset.event = train_dataset.event
+    val_dataset.event_index = train_dataset.event_index
 
     assert train_dataset.vocab_size() == val_dataset.vocab_size()
+    
+    # print out some dataset params
+    logger.info(f'sample_rate={sample_rate}, n_fft={n_fft}, hop_length={hop_length}, n_mels={n_mels}, total number of tokens {train_dataset.vocab_size()}')
 
     val_loader = torch.utils.data.DataLoader(val_dataset, collate_fn=collate_fn, batch_size=batch_size, num_workers=num_workers)
 
@@ -202,11 +210,10 @@ def main(config_fn='settings.yaml'):
 
     for epoch in range(epochs):
         t0 = time.time()
-        batch_t0 = t0
-        
-        train_loss = train(transformer, train_loader, optimizer, scheduler, log_interval=log_interval)
 
+        train_loss = train(transformer, train_loader, optimizer, scheduler, log_interval=log_interval)
         t1 = time.time()
+
         val_loss = validate(transformer, val_loader)
         t2 = time.time()
 
