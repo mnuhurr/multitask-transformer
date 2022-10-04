@@ -27,11 +27,19 @@ class Encoder(torch.nn.Module):
         super().__init__()
 
         self.conv_net = torch.nn.Sequential(
-            torch.nn.Conv1d(n_mels, d_model, kernel_size=5, padding=2),
+            torch.nn.Conv1d(n_mels, d_model, kernel_size=7, padding=3),
             torch.nn.GELU(),
-            torch.nn.Conv1d(d_model, d_model, kernel_size=5, stride=2, padding=2),
-            torch.nn.GELU(),
-            torch.nn.Conv1d(d_model, d_model, kernel_size=5, stride=2, padding=2),
+            torch.nn.Dropout(p=dropout),
+
+            #torch.nn.Conv1d(d_model, d_model, kernel_size=5, padding=2, stride=2),
+            #torch.nn.GELU(),
+            #torch.nn.Dropout(p=dropout),
+
+            #torch.nn.Conv1d(d_model, d_model, kernel_size=5, padding=2, stride=2),
+            #torch.nn.GELU(),
+            #torch.nn.Dropout(p=dropout),
+
+            torch.nn.Conv1d(d_model, d_model, kernel_size=5, padding=2, stride=2),
             torch.nn.GELU(),
         )
 
@@ -52,8 +60,10 @@ class Encoder(torch.nn.Module):
 
         # use pooling to make the mask the same length
         if mask is not None:
-            mask = F.max_pool1d(mask.unsqueeze(1), kernel_size=3, padding=1, stride=2)
-            mask = F.max_pool1d(mask, kernel_size=3, padding=1, stride=2)[:, 0, :]
+            #mask = F.max_pool1d(mask.unsqueeze(1), kernel_size=3, padding=1, stride=2)
+            #mask = F.max_pool1d(mask, kernel_size=3, padding=1, stride=2)
+            #mask = F.max_pool1d(mask, kernel_size=3, padding=1, stride=2)[:, 0, :]
+            mask = F.max_pool1d(mask.unsqueeze(1), kernel_size=3, padding=1, stride=2)[:, 0, :]
 
         x = self.positional_encoding(x)
            

@@ -13,8 +13,28 @@ token range:
     - 
 """
 
+def spec_aug_rand(mels, param, dim):
+    n = mels.size(dim)
+
+    p = torch.randint(param, size=(1,))
+    p_0 = torch.randint(int(n - p), size=(1,)) if n > p else 0
+
+    return p_0, p
+
+def spec_augment(mels, f_param, t_param):
+    if f_param > 0:
+        f_0, f = spec_aug_rand(mels, f_param, dim=0)
+        mels[f_0:f_0 + f, :] = 0
+
+    if t_param > 0:
+        t_0, t = spec_aug_rand(mels, t_param, dim=1)
+        mels[:, t_0:t_0 + t] = 0
+
+    return mels
+
+
 class MultitaskDataset(torch.utils.data.Dataset):
-    def __init__(self, caption_data=None, scene_data=None, event_data=None, tokenizer=None, n_fft=1024, hop_length=None, n_mels=128, sample_rate=16000, max_mel_length=768):
+    def __init__(self, caption_data=None, scene_data=None, event_data=None, tokenizer=None, n_fft=1024, hop_length=None, n_mels=128, sample_rate=16000, max_mel_length=768, mask_freq_param=0, mask_time_param=0):
         """
         all data: lists of (filename, output) pairs
 
@@ -36,6 +56,9 @@ class MultitaskDataset(torch.utils.data.Dataset):
         self.sample_rate = sample_rate
 
         self.mel_spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate, n_fft=n_fft, hop_length=hop_length, n_mels=n_mels)
+
+        self.mask_f_param = mask_freq_param
+        self.mask_t_param = mask_time_param
 
         # find different classes
         self.scene = self.get_scene_labels(self.scene_data)
@@ -93,6 +116,8 @@ class MultitaskDataset(torch.utils.data.Dataset):
         if mels.size(1) > self.max_mel_length:
             offset = torch.randint(mels.size(1) - self.max_mel_length, size=(1,))
             mels = mels[:, offset:offset + self.max_mel_length]
+
+        mels = spec_augment(mels, self.mask_f_param, self.mask_t_param)
 
         assert mels.size(0) == self.n_mels
         assert mels.size(1) <= self.max_mel_length

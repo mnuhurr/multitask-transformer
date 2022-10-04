@@ -6,6 +6,7 @@ from pathlib import Path
 from operator import itemgetter
 from tqdm import tqdm
 
+from common import read_json
 
 # captions
 def get_clotho_data(clotho_dir, split='development'):
@@ -48,6 +49,21 @@ def get_audiocaps_data(audiocaps_dir, split='train', min_duration=None):
     return data
 
 
+def get_macs_data(macs_json, macs_data_dir):
+    macs_data_dir = Path(macs_data_dir)
+    captions = read_json(macs_json)
+
+    data = []
+
+    for fn in captions:
+        audio_fn = macs_data_dir / fn
+        if audio_fn.exists():
+            for caption in captions[fn]:
+                data.append((audio_fn, caption))
+
+    return data
+
+
 def get_captioning_data(cfg, split='development'):
     
     data = []
@@ -63,6 +79,9 @@ def get_captioning_data(cfg, split='development'):
 
     if 'audiocaps_dir' in cfg:
         data.extend(get_audiocaps_data(cfg['audiocaps_dir'], split=ac_split))
+
+    if 'macs_json' in cfg and 'macs_data_dir' in cfg and split == 'development':
+        data.extend(get_macs_data(cfg['macs_json'], cfg['macs_data_dir']))
 
     return data
 
@@ -120,6 +139,7 @@ def get_audioset_data(fn, audio_dir, min_duration=None):
 
     return data
 
+
 def get_audioset_data_combined(fn, audio_dir, min_duration=None):
     # return list contains (file, list of events)
     df = pd.read_csv(fn, delimiter='\t', index_col=0)
@@ -142,6 +162,7 @@ def get_audioset_data_combined(fn, audio_dir, min_duration=None):
             data[audio_fn] = [list(row)]
 
     return list(zip(data.keys(), data.values()))
+
 
 def get_events_data(cfg):
     data = []
