@@ -162,9 +162,7 @@ def main(config_fn='settings.yaml'):
         sample_rate=sample_rate,
         n_fft=n_fft,
         hop_length=hop_length,
-        n_mels=n_mels,
-        mask_freq_param=mask_freq_param,
-        mask_time_param=mask_time_param)
+        n_mels=n_mels)
 
     val_dataset.scene = train_dataset.scene
     val_dataset.scene_index = train_dataset.scene_index
