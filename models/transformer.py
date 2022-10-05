@@ -129,25 +129,3 @@ class Transformer(torch.nn.Module):
 
         return logits
 
-
-def foo():
-    #enc = Encoder(4, 200, 8, 16, 2, 2)
-    #dec = Decoder(300, 50, 8, 16, 2, 2)
-    params = ModelParameters(n_mels=4, n_tokens=500, d_model=8, d_ff=64)
-    tf = Transformer(params)
-
-    mels = torch.randn(2, 4, 10)
-    mel_mask = torch.zeros(2, 10)
-    mel_mask[:, 5:] = -float('inf')
-
-    tokens = torch.randint(150, size=(2, 30)) + 10
-    token_mask = torch.zeros(2, 30)
-    token_mask[:, 10:] = -float('inf')
-
-    logits = tf(mels, tokens, mel_mask, token_mask)
-    print(torch.argmax(logits, dim=-1))
-
-
-if __name__ == '__main__':
-    foo()
-            
