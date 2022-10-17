@@ -59,6 +59,7 @@ def predict_captions(audio_fns, model, cfg):
         mels = mel_spec(y)
         
         captions[Path(fn).name] = generate_caption(model, mels, tokenizer)
+        #print(captions[Path(fn).name])
 
     return captions
 
@@ -71,7 +72,7 @@ def main(config_fn='eval_settings.yaml'):
     train_cfg = read_yaml(cfg_fn)
     
     params = read_pickle('train_params.pkl')
-    transformer = load_transformer('data/transformer/model-10.pt', params)
+    transformer = load_transformer('data/transformer/model-13.pt', params)
     transformer.eval()
 
     caption_cfg = eval_cfg.get('captions')
